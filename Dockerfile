@@ -15,20 +15,26 @@ RUN apt-get update && \
     postgresql-contrib-9.3 \
     postgresql-server-dev-9.3
 
-USER postgres
-
-RUN /etc/init.d/postgresql start && \
-    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" && \
-    psql --command "CREATE EXTENSION adminpack;" && \
-    createdb -O docker docker
-
-RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf
-
-RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
 
 EXPOSE 5432
 
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+RUN mkdir -p /postgresql && chown postgres /postgresql
 
-CMD ["-D", "/var/lib/postgresql/9.3/main", "-c", "config_file=/etc/postgresql/9.3/main/postgresql.conf"]
+USER postgres
+
+RUN date > /tmp/pw.txt && \
+    /usr/lib/postgresql/9.3/bin/initdb --auth-host=md5 --auth-local=trust --pgdata=/postgresql/data --xlogdir=/postgresql/xlog --encoding=UTF-8 --username=postgres --pwfile=/tmp/pw.txt && \
+    rm /tmp/pw.txt && \
+    /usr/lib/postgresql/9.3/bin/pg_ctl start -D /postgresql/data -w && \
+    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" && \
+    createdb -O docker docker && \
+    psql -d docker --command "CREATE EXTENSION fuzzystrmatch;" && \
+    psql -d docker --command "CREATE EXTENSION postgis;" && \
+    psql -d docker --command "CREATE EXTENSION postgis_topology;" && \
+    psql -d docker --command "CREATE EXTENSION postgis_tiger_geocoder;" && \
+    /usr/lib/postgresql/9.3/bin/pg_ctl stop -D /postgresql/data -w
+
+VOLUME  ["/postgresql/log", "/postgresql/data", "/postgresql/xlog"]
+
+CMD ["-D", "/var/lib/postgresql/9.3/main", "-h", "0.0.0.0", "-p", "5432"]
 ENTRYPOINT ["/usr/lib/postgresql/9.3/bin/postgres"]
