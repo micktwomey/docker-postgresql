@@ -36,5 +36,5 @@ RUN date > /tmp/pw.txt && \
 
 VOLUME  ["/postgresql/log", "/postgresql/data", "/postgresql/xlog"]
 
-CMD ["-D", "/var/lib/postgresql/9.3/main", "-h", "0.0.0.0", "-p", "5432"]
+CMD ["-D", "/postgresql/data", "-h", "0.0.0.0", "-p", "5432"]
 ENTRYPOINT ["/usr/lib/postgresql/9.3/bin/postgres"]
