@@ -25,6 +25,7 @@ USER postgres
 RUN date > /tmp/pw.txt && \
     /usr/lib/postgresql/9.3/bin/initdb --auth-host=md5 --auth-local=trust --pgdata=/postgresql/data --xlogdir=/postgresql/xlog --encoding=UTF-8 --username=postgres --pwfile=/tmp/pw.txt && \
     rm /tmp/pw.txt && \
+    echo "host    all    all    0.0.0.0/0    md5" >> /postgresql/data/pg_hba.conf && \
     /usr/lib/postgresql/9.3/bin/pg_ctl start -D /postgresql/data -w && \
     psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" && \
     createdb -O docker docker && \
