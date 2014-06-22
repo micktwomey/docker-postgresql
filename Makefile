@@ -1,5 +1,6 @@
 IMAGE=micktwomey/postgresql
-TAG=$(IMAGE):9.3.4-1
+VERSION=9.3.4-1
+TAG=$(IMAGE):$(VERSION)
 TAG_LATEST=$(IMAGE):latest
 
 build:
@@ -14,3 +15,6 @@ run:
 
 start:
 	docker run -d --name=postgresql $(TAG)
+
+tag:
+	git tag $(VERSION)
