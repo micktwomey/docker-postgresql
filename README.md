@@ -9,3 +9,7 @@ Includes:
 - development libraries
 - PostGIS
 
+Scripts:
+
+- postgresql-create-instance.sh
+    + Creates an instance called "docker" with a default username of docker and password docker.
